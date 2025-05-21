@@ -20,5 +20,6 @@ def matrix_transpose(matrix):
         for row in range(rows):
             new_row.append(matrix[row][col])
         transposed.append(new_row)
+    return transposed
 
 
