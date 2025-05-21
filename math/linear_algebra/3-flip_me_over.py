@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
+""" Calculates the transpose of a matrix
+"""
+
 
 def matrix_transpose(matrix):
-    """
-    Transposes a matrix.
-    Args:
-        matrix (list of list of int): Input matrix.
-    Returns:
-        list of list of int: Transposed matrix.
-    """
-    # Get the number of rows and cols
-    rows = len(matrix)
-    cols = len(matrix[0])
+    """ Calculates the transpose of a matrix """
+    transpose = []
+    for i in range(len(matrix[0])):
+        transpose.append([])
+    for row in matrix:
+        for i in range(len(row)):
+            transpose[i].append(row[i])
+    return transpose
 
-    # Create a new matri to create a new transpose
-    transposed = []
-
-    for col in range(cols):
-        new_row = []
-        for row in range(rows):
-            new_row.append(matrix[row][col])
-        transposed.append(new_row)
-    return transposed
+# mat1 = [[1, 2], [3, 4]]
+# print(mat1)
+# print(matrix_transpose(mat1))
+# mat2 = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15],
+#         [16, 17, 18, 19, 20], [21, 22, 23, 24, 25], [26, 27, 28, 29, 30]]
+# print(mat2)
+# print(matrix_transpose(mat2))
 
 
