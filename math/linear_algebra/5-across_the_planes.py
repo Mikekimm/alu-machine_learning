@@ -1,25 +1,38 @@
 #!/usr/bin/env python3
-def add_matrices2D(mat1, mat2):
-    """Adds two 2D matrices element-wise.
-    Args:
-        mat1 (list of list of int/float): First matrix.
-        mat2 (list of list of int/float): Second matrix.
-    Returns:
-        list of list of int/float: Resultant matrix after addition.
-    """
+"""
+Add 2D matrices
+"""
 
+
+def add_matrices2D(mat1, mat2):
+    """Add the two matrices
+
+    Args:
+        mat1 (_type_): _description_
+        mat2 (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    sum_array = []
     if len(mat1) != len(mat2):
         return None
+    for i in range(len(mat1)):
+        if isinstance(mat1[i], list) and len(mat1[i]) != len(mat2[i]):
+            return None
+        elif not isinstance(mat1[i], list):
+            sum_array.append(mat1[i] + mat2[i])
+        elif isinstance(mat1[i], list):
+            sum_array.append([])
+            for j in range(len(mat1[i])):
 
-    if len(mat1[0]) != len(mat2[0]):
-        return None
+                sum_array[i].append(mat1[i][j] + mat2[i][j])
+    return sum_array
 
-    result = []
 
-    for row1, row2 in zip(mat1, mat2):
-        new_row = []
-        for a, b in zip(row1, row2):
-            new_row.append(a + b)
-        result.append(new_row)
-
-    return result
+# mat1 = [[1, 2], [3, 4]]
+# mat2 = [[5, 6], [7, 8]]
+# print(add_matrices2D(mat1, mat2))
+# print(mat1)
+# print(mat2)
+# print(add_matrices2D(mat1, [[1, 2, 3], [4, 5, 6]]))
