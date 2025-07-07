@@ -35,4 +35,4 @@ def convolve_grayscale(images, kernel, padding='same', stride=(1, 1)):
             square = padded[:, h * sh: h * sh + kh, w * sw: w * sw + kw]
             insert = np.sum(square * kernel, axis=1).sum(axis=1)
             convoluted[:, h, w] = insert
-    return convoluted`
+    return convoluted
