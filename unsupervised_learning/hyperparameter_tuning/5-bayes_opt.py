@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Creates class that performs Bayesian optimization
 on a noiseless 1D Gaussian process
@@ -122,5 +122,4 @@ class BayesianOptimization:
         X_opt = self.gp.X[idx_opt]
         Y_opt = self.gp.Y[idx_opt]
 
-        return X_opt, Y_opt
-
+                return X_opt, Y_opt
