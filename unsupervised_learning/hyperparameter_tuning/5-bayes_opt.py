@@ -119,4 +119,3 @@ class BayesianOptimization:
         Y_opt = self.gp.Y[idx_opt]
 
         return X_opt, Y_opt
-
