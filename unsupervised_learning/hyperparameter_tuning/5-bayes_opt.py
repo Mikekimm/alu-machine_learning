@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 """
 Creates class that performs Bayesian optimization
 on a noiseless 1D Gaussian process
@@ -106,12 +106,8 @@ class BayesianOptimization:
             if X_next.tolist() in X_all:
                 break
 
-            # Evaluate the function
             Y_next = self.f(X_next)
-
-            # Update Gaussian Process with new sample
             self.gp.update(X_next, Y_next)
-
             X_all.append(X_next.tolist())
 
         if self.minimize:
@@ -122,4 +118,5 @@ class BayesianOptimization:
         X_opt = self.gp.X[idx_opt]
         Y_opt = self.gp.Y[idx_opt]
 
-                return X_opt, Y_opt
+        return X_opt, Y_opt
+
