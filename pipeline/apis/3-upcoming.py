@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Displays the next upcoming SpaceX launch."""
+"""Display the next upcoming SpaceX launch.
+
+Format:
+<launch name> (<date in local time>) <rocket name> - <launchpad name> (<launchpad locality>)
+"""
 
 import requests
 from datetime import datetime
@@ -7,51 +11,48 @@ import pytz
 
 
 def get_upcoming_launch():
+    """Fetch and print the soonest upcoming SpaceX launch."""
     base_url = "https://api.spacexdata.com/v4"
 
-    # Get all upcoming launches
-    launches_res = requests.get("{}/launches/upcoming".format(base_url))
-    if launches_res.status_code != 200:
-        return
+    # Fetch upcoming launches
+    response = requests.get(f"{base_url}/launches/upcoming")
+    response.raise_for_status()
+    launches = response.json()
 
-    launches = launches_res.json()
     if not launches:
+        print("No upcoming launches found")
         return
 
-    # Sort by date_unix (earliest first)
-    launches.sort(key=lambda x: x['date_unix'])
+    # Sort launches by date_unix ascending
+    launches.sort(key=lambda launch: launch['date_unix'])
 
-    # Get the soonest launch
-    next_launch = launches[0]
+    # Pick the earliest launch
+    launch = launches[0]
 
-    launch_name = next_launch['name']
-    launch_time_utc = datetime.fromtimestamp(next_launch['date_unix'], tz=pytz.utc)
-    local_time = launch_time_utc.astimezone()  # Convert to local time
+    # Get local datetime from UTC unix timestamp
+    launch_time_utc = datetime.utcfromtimestamp(launch['date_unix']).replace(tzinfo=pytz.utc)
+    launch_time_local = launch_time_utc.astimezone()
 
-    rocket_id = next_launch['rocket']
-    launchpad_id = next_launch['launchpad']
-
-    # Get rocket name
-    rocket_res = requests.get("{}/rockets/{}".format(base_url, rocket_id))
-    rocket_name = rocket_res.json().get('name', 'Unknown')
+    # Get rocket info
+    rocket_response = requests.get(f"{base_url}/rockets/{launch['rocket']}")
+    rocket_response.raise_for_status()
+    rocket = rocket_response.json()
 
     # Get launchpad info
-    pad_res = requests.get("{}/launchpads/{}".format(base_url, launchpad_id))
-    pad_info = pad_res.json()
-    pad_name = pad_info.get('name', 'Unknown')
-    pad_locality = pad_info.get('locality', 'Unknown')
+    launchpad_response = requests.get(f"{base_url}/launchpads/{launch['launchpad']}")
+    launchpad_response.raise_for_status()
+    launchpad = launchpad_response.json()
 
-    # Format output
-    output = "{} ({}) {} - {} ({})".format(
-        launch_name,
-        local_time.isoformat(),
-        rocket_name,
-        pad_name,
-        pad_locality
+    # Format output string
+    output = (
+        f"{launch['name']} "
+        f"({launch_time_local.isoformat()}) "
+        f"{rocket['name']} - "
+        f"{launchpad['name']} ({launchpad['locality']})"
     )
+
     print(output)
 
 
 if __name__ == "__main__":
     get_upcoming_launch()
-
