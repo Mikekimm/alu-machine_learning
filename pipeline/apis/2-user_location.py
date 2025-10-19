@@ -34,4 +34,3 @@ if __name__ == "__main__":
         sys.exit(1)
 
     get_user_location(sys.argv[1])
-
