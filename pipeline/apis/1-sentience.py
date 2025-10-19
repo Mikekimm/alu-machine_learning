@@ -30,4 +30,3 @@ def sentientPlanets():
         url = data.get('next')
 
     return output
-
