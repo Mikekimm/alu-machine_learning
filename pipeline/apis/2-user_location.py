@@ -18,7 +18,7 @@ def get_user_location(url):
         rate_limit = int(res.headers.get('X-Ratelimit-Reset', 0))
         current_time = int(time.time())
         diff = int((rate_limit - current_time) / 60)
-        print("Rest in {} min".format(diff))
+        print("Rate limit. Retry in {} min".format(diff))
     elif res.status_code == 404:
         print("Not found")
     elif res.status_code == 200:
