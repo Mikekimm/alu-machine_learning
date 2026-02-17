@@ -1,1 +1,2 @@
-cat 0-create_database_if_missing.sql | mysql -hlocalhost -uroot -p
+-- Creates the database db_0 in your MySQL server
+CREATE DATABASE IF NOT EXISTS db_0;
