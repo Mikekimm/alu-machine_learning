@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
+"""Positional encoding for transformer models."""
 import numpy as np
 
 
 def positional_encoding(max_seq_len, dm):
     """
     Calculates positional encoding for a transformer.
+
+    max_seq_len: maximum sequence length
+    dm: model depth
+
+    Returns: numpy.ndarray of shape (max_seq_len, dm)
     """
     PE = np.zeros((max_seq_len, dm))
 
