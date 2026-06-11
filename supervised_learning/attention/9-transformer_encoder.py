@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Transformer Encoder"""
 import tensorflow as tf
-import numpy as np
-
 positional_encoding = __import__('4-positional_encoding').positional_encoding
 EncoderBlock = __import__('7-transformer_encoder_block').EncoderBlock
 
@@ -29,17 +27,15 @@ class Encoder(tf.keras.layers.Layer):
         self.dropout = tf.keras.layers.Dropout(drop_rate)
 
     def call(self, x, training, mask):
-        """Forward pass"""
+        """Forward propagation"""
 
         seq_len = tf.shape(x)[1]
 
         x = self.embedding(x)
 
-        # scale embedding
-        x *= tf.math.sqrt(tf.cast(self.dm, tf.float32))
+        x = x * tf.math.sqrt(tf.cast(self.dm, tf.float32))
 
-        # add positional encoding
-        x += self.positional_encoding[:seq_len]
+        x = x + self.positional_encoding[:seq_len]
 
         x = self.dropout(x, training=training)
 
