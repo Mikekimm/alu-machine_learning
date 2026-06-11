@@ -74,5 +74,3 @@ class RNNDecoder(tf.keras.layers.Layer):
 
         # Dense layer to vocab
         y = self.F(output)
-
-        return y, s
