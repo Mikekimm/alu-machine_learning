@@ -1,75 +1,122 @@
 #!/usr/bin/env python3
+"""
+Defines the class GRUCell that represents a gated recurrent unit
+"""
+
+
 import numpy as np
 
 
 class GRUCell:
     """
-    Gated Recurrent Unit (GRU) cell
-    """
+    Represents a gated recurrent unit
 
+    class constructor:
+        def __init__(self, i, h, o)
+
+    public instance attributes:
+        Wz: update gate weights
+        bz: update gate biases
+        Wr: reset gate weights
+        br: reset gate biases
+        Wh: intermediate hidden state and input data weights
+        bh: intermediate hidden state and input data biases
+        Wy: output weights
+        by: output biases
+
+    public instance methods:
+        def forward(self, h_prev, x_t):
+            performs forward propagation for one time step
+    """
     def __init__(self, i, h, o):
         """
-        i: input dimensionality
-        h: hidden state dimensionality
-        o: output dimensionality
+        Class constructor
+
+        parameters:
+            i: dimensionality of the data
+            h: dimensionality of the hidden state
+            o: dimensionality of the outputs
+
+        creates public instance attributes:
+            Wz: update gate weights
+            bz: update gate biases
+            Wr: reset gate weights
+            br: reset gate biases
+            Wh: intermediate hidden state and input data weights
+            bh: intermediate hidden state and input data biases
+            Wy: output weights
+            by: output biases
+
+        weights should be initialized using random normal distribution
+        weights will be used on the right side for matrix multiplication
+        biases should be initiliazed as zeros
         """
-        self.i = i
-        self.h = h
-        self.o = o
-
-        # Weights (random normal)
-        self.Wz = np.random.randn(i + h, h)
-        self.Wr = np.random.randn(i + h, h)
-        self.Wh = np.random.randn(i + h, h)
-        self.Wy = np.random.randn(h, o)
-
-        # Biases (zeros)
         self.bz = np.zeros((1, h))
         self.br = np.zeros((1, h))
+        self.Wz = np.random.normal(size=(h + i, h))
+        self.Wr = np.random.normal(size=(h + i, h))
         self.bh = np.zeros((1, h))
         self.by = np.zeros((1, o))
+        self.Wh = np.random.normal(size=(h + i, h))
+        self.Wy = np.random.normal(size=(h, o))
 
-    @staticmethod
-    def sigmoid(x):
-        """Sigmoid activation"""
-        return 1 / (1 + np.exp(-x))
+    def softmax(self, x):
+        """
+        Performs the softmax function
 
-    @staticmethod
-    def softmax(x):
-        """Softmax activation (stable)"""
-        exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
-        return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+        parameters:
+            x: the value to perform softmax on to generate output of cell
+
+        return:
+            softmax of x
+        """
+        e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+        softmax = e_x / e_x.sum(axis=1, keepdims=True)
+        return softmax
+
+    def sigmoid(self, x):
+        """
+        Performs the sigmoid function
+
+        parameters:
+            x: the value to perform sigmoid on
+
+        return:
+            sigmoid of x
+        """
+        sigmoid = 1 / (1 + np.exp(-x))
+        return sigmoid
 
     def forward(self, h_prev, x_t):
         """
-        Forward propagation for one time step
+        Performs forward propagation for one time step
 
-        h_prev: (m, h)
-        x_t: (m, i)
+        parameters:
+            h_prev [numpy.ndarray of shape (m, h)]:
+                contains previous hidden state
+                m: the batch size for the data
+                h: dimensionality of hidden state
+            x_t [numpy.ndarray of shape (m, i)]:
+                contains data input for the cell
+                m: the batch size for the data
+                i: dimensionality of the data
 
-        Returns:
-            h_next: (m, h)
-            y: (m, o)
+        output of the cell should use softmax activation function
+
+        returns:
+            h_next, y:
+            h_next: the next hidden state
+            y: the output of the cell
         """
+        concatenation1 = np.concatenate((h_prev, x_t), axis=1)
+        z_gate = self.sigmoid(np.matmul(concatenation1, self.Wz) + self.bz)
+        r_gate = self.sigmoid(np.matmul(concatenation1, self.Wr) + self.br)
 
-        # Concatenate input and previous hidden state
-        concat = np.concatenate((h_prev, x_t), axis=1)
+        concatenation2 = np.concatenate((r_gate * h_prev, x_t), axis=1)
+        h_next = np.tanh(np.matmul(concatenation2, self.Wh) + self.bh)
+        h_next *= z_gate
+        h_next += (1 - z_gate) * h_prev
 
-        # Update gate
-        z = self.sigmoid(np.matmul(concat, self.Wz) + self.bz)
-
-        # Reset gate
-        r = self.sigmoid(np.matmul(concat, self.Wr) + self.br)
-
-        # Candidate hidden state
-        r_h = r * h_prev
-        concat_h = np.concatenate((r_h, x_t), axis=1)
-        h_tilde = np.tanh(np.matmul(concat_h, self.Wh) + self.bh)
-
-        # Next hidden state
-        h_next = (1 - z) * h_prev + z * h_tilde
-
-        # Output
         y = self.softmax(np.matmul(h_next, self.Wy) + self.by)
 
         return h_next, y

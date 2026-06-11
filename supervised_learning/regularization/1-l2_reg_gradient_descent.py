@@ -1,39 +1,32 @@
 #!/usr/bin/env python3
-"""Gradient Descent with L2 Regularization"""
+"""
+Compute gradient descent with L2 regularization
+"""
+
 
 import numpy as np
 
 
 def l2_reg_gradient_descent(Y, weights, cache, alpha, lambtha, L):
-    """Updates weights and biases using gradient descent with L2 regularization
+    """ Compute gradient descent with L2 regularization
 
     Args:
-        Y: one-hot numpy.ndarray of shape (classes, m) with correct labels
-        weights: dict of weights and biases
-        cache: dict of all activations of the network
-        alpha: learning rate
-        lambtha: L2 regularization parameter
-        L: number of layers in the network
+        Y (numpy.ndarray): one-hot matrix with the correct labels
+        weights (dict): The weights and biases of the network
+        cache (dict): The outputs of each layer of the network
+        alpha (float): The learning rate
+        lambtha (float): The L2 regularization parameter
+        L (int): The number of layers of the network
     """
     m = Y.shape[1]
-    dZ = cache['A{}'.format(L)] - Y  # Output layer derivative
+    dz = cache['A' + str(L)] - Y
+    for i in range(L, 0, -1):
+        A = cache['A' + str(i - 1)]
+        W = weights['W' + str(i)]
+        dw = (1 / m) * np.matmul(dz, A.T) + (lambtha / m) * W
+        db = (1 / m) * np.sum(dz, axis=1, keepdims=True)
+        dz = np.matmul(W.T, dz) * (1 - np.square(A))
+        weights['W' + str(i)] = weights['W' + str(i)] - alpha * dw
+        weights['b' + str(i)] = weights['b' + str(i)] - alpha * db
 
-    for l in reversed(range(1, L + 1)):
-        A_prev = cache['A{}'.format(l - 1)]
-        W_key = 'W{}'.format(l)
-        b_key = 'b{}'.format(l)
-        W = weights[W_key]
-
-        # Compute gradients
-        dW = (np.matmul(dZ, A_prev.T) + lambtha * W) / m
-        db = np.sum(dZ, axis=1, keepdims=True) / m
-
-        # Update weights and biases
-        weights[W_key] -= alpha * dW
-        weights[b_key] -= alpha * db
-
-        # Backpropagate dZ to previous layer
-        if l > 1:
-            dA_prev = np.matmul(W.T, dZ)
-            A_prev = cache['A{}'.format(l - 1)]
-            dZ = dA_prev * (1 - A_prev ** 2)  # tanh derivative
+    return weights

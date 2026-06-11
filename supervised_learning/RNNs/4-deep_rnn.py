@@ -1,50 +1,53 @@
 #!/usr/bin/env python3
+"""
+Defines function that performs forward propagation for a deep RNN
+"""
+
+
 import numpy as np
-
-
-def softmax(x):
-    e = np.exp(x - np.max(x, axis=1, keepdims=True))
-    return e / np.sum(e, axis=1, keepdims=True)
 
 
 def deep_rnn(rnn_cells, X, h_0):
     """
-    rnn_cells: list of RNNCell objects (length l)
-    X: (t, m, i)
-    h_0: (l, m, h)
+    Performs forward propagation for a deep RNN
+    parameters:
+        rnn_cells [list of instances of RNNCell]:
+            cells that will be used for the forward propagation
+            l: list length; number of layers in deep RNN
+        X [numpy.ndarray of shape (t, m, i)]:
+            the data to be used
+            t: maximum number of time steps
+            m: the batch size
+            i: the dimensionality of the data
+        h_0 [numpy.ndarray of shape (l, m, h)]:
+            the initial hidden state
+            l: number of layers
+            m: the batch size
+            h: the dimensionality of the hidden state
 
-    Returns:
-    H: (t+1, l, m, h)
-    Y: (t, m, o) from last layer
+    returns:
+        H, Y:
+            H [numpy.ndarray]:
+                contains all the hidden states
+            Y [numpy.ndarray]:
+                contains all the outputs
     """
-
-    t, m, _ = X.shape
-    l = len(rnn_cells)
-
-    # hidden states (include h_0 at time step 0)
-    H = np.zeros((t + 1, l, m, rnn_cells[0].h))
+    layers = len(rnn_cells)
+    t, m, i = X.shape
+    l, m, h = h_0.shape
+    H = np.zeros((t + 1, layers, m, h))
     H[0] = h_0
-
-    Y = None
-
     for step in range(t):
-        x_t = X[step]
-
-        for layer in range(l):
-            cell = rnn_cells[layer]
-            h_prev = H[step, layer]
-
-            # forward pass for this layer
-            h_next, y = cell.forward(h_prev, x_t)
-
-            H[step + 1, layer] = h_next
-
-            # input for next layer is current layer output
-            x_t = h_next
-
-        # output comes from last layer
-        Y = softmax(np.matmul(H[step + 1, -1], rnn_cells[-1].Wy) + rnn_cells[-1].by)
-
-        # if model provides its own softmax inside cell, this still matches expected behavior
-
-    return H, Y
+        for layer in range(layers):
+            if layer == 0:
+                h_prev = X[step]
+            h_prev, y = rnn_cells[layer].forward(H[step, layer], h_prev)
+            H[step + 1, layer, ...] = h_prev
+            if layer == layers - 1:
+                if step == 0:
+                    Y = y
+                else:
+                    Y = np.concatenate((Y, y))
+    output_shape = Y.shape[-1]
+    Y = Y.reshape(t, m, output_shape)
+    return (H, Y)
